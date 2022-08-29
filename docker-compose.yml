@@ -1,0 +1,41 @@
+version: "3.9" 
+networks:
+  webservice:
+services:
+  web:
+    build: .
+    container_name: web
+    volumes:
+      - ./sites:/var/www/html
+      - ./config/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    ports:
+      - 80:80
+    networks:
+      - webservice
+
+  db:
+    image: mysql
+    container_name: mysql
+    volumes:
+      - ./db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+    ports:
+      - 3306:3306
+    networks:
+      - webservice
+  
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: pma
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+    networks:
+      - webservice
